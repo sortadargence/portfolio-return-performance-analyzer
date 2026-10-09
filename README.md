@@ -26,7 +26,7 @@ On macOS or Linux, use `python3 -m venv .venv`, then `.venv/bin/python` in place
 
 ## Return CSV Format
 
-Use columns named `date`, `return`, and `benchmark`; capitalization does not matter. Upload daily returns in decimal values (`0.01` means 1%). For example:
+Use columns named `date`, `return`, and `benchmark`. Capitalization does not matter. Upload daily returns in decimal values (`0.01` means 1%). For example:
 
 ```csv
 date,return,benchmark
@@ -34,7 +34,7 @@ date,return,benchmark
 2024-01-03,-0.005,-0.003
 ```
 
-The loader sorts dates, drops rows with missing or invalid dates or returns, and rejects duplicate dates. The dashboard accepts CSV files up to 10 MiB and 20,000 valid rows. It needs at least the greater of 30 rows and the selected rolling-window length (20–252 days).
+The loader sorts dates, drops rows with missing or invalid dates or returns, and rejects duplicate dates. The dashboard accepts CSV files up to 10 MiB and 20,000 valid rows and needs at least the greater of 30 rows and the selected rolling-window length (20–252 days).
 
 The **Try sample data** button loads [returns.csv](returns.csv), which contains the daily returns of Invesco QQQ Trust (QQQ) downloaded from the yfinance library over 6,036 observations (Jan 3, 2001 — Dec 31, 2024). 
 
@@ -42,12 +42,12 @@ The **Try sample data** button loads [returns.csv](returns.csv), which contains 
 
 The report shows the following metrics:
 - **Performance:** total return, annualized return, annualized volatility, Sharpe ratio, Sortino Ratio and maximum drawdown for the portfolio and the benchmark.
-- **Charts:** growth of $1 invested in the portfolio at the beggining of the period, drawdown, rolling Sharpe ratio, and daily return distribution
+- **Charts:** growth of $1 invested in the portfolio at the beginning of the period, drawdown, rolling Sharpe ratio, and daily return distribution
 - **Regressions:** estimated benchmark sensitivity and factor loadings from Fama-French 3 and 5 factor models, momentum factor and Carhart 4 factor model.
 - **Rolling Estimates:** rolling factor coefficients calculated on a rolling basis
 - **Input Preview:** the eight most recent valid rows
 
-The dashboard runs on `127.0.0.1`. Uploaded CSV data is sent to that local Python server for analysis. Factor datasets are fetched separately from Kenneth French's Data Library usind pandas-datareader.
+The dashboard runs on `127.0.0.1`. Uploaded CSV data is sent to that local Python server for analysis. Factor datasets are fetched separately from Kenneth French's Data Library using pandas-datareader.
 
 ## Project files
 
