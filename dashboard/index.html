@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio Return Analyzer</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1>Portfolio Return Analyzer</h1>
+      <p>Explore performance, risk, and factor exposure from a portfolio's daily returns.</p>
+    </header>
+
+    <section class="controls" aria-labelledby="data-heading">
+      <h2 id="data-heading">Choose your data</h2>
+      <p>Upload a CSV with columns named <code>date</code>, <code>return</code>, and <code>benchmark</code> (capitalization does not matter). Each row should contain daily returns as decimals: <code>0.01</code> means 1%.</p>
+      <div class="control-grid">
+        <div class="field">
+          <label for="csv-file">CSV file</label>
+          <input id="csv-file" type="file" accept=".csv,text/csv">
+          <button id="sample-button" class="secondary-button" type="button">Try sample data</button>
+        </div>
+        <div class="field">
+          <label for="window">Rolling window: <output id="window-value">60 days</output></label>
+          <input id="window" type="range" min="20" max="252" value="60">
+          <div class="range-limits"><span>20 days</span><span>252 days</span></div>
+          <p class="field-help">Used for rolling Sharpe and factor betas.</p>
+        </div>
+        <div class="run-field">
+          <button id="run-button" class="primary-button" type="button" disabled>Run analysis</button>
+          <p id="side-status" class="status" role="status">Choose a CSV file to begin.</p>
+        </div>
+      </div>
+    </section>
+
+    <div id="notice" class="notice" role="alert" hidden></div>
+
+    <div id="report" hidden>
+      <header class="report-header">
+        <div>
+          <h2>Results</h2>
+          <p id="period-label">—</p>
+          <p class="report-meta"><span id="row-pill">—</span><span id="window-pill">—</span></p>
+        </div>
+        <div class="range-control">
+          <span>Line chart range</span>
+          <div class="range-buttons" aria-label="Line chart date range">
+            <button type="button" data-range="1Y">1 year</button>
+            <button type="button" data-range="5Y">5 years</button>
+            <button type="button" data-range="ALL" class="selected">All</button>
+          </div>
+        </div>
+      </header>
+
+      <nav class="report-nav" aria-label="Report sections">
+        <a href="#summary">Overview</a>
+        <a href="#growth">Growth</a>
+        <a href="#risk">Risk</a>
+        <a href="#factors">Factors</a>
+        <a href="#observations">Data</a>
+      </nav>
+
+      <section id="summary" class="section" aria-labelledby="summary-heading">
+        <h2 id="summary-heading">Performance and risk</h2>
+        <p class="section-intro">Portfolio values are shown alongside the same measure for the benchmark.</p>
+        <div class="metric-grid" id="metric-grid"></div>
+      </section>
+
+      <section id="growth" class="section" aria-labelledby="growth-heading">
+        <h2 id="growth-heading">Growth of $1</h2>
+        <p class="section-intro">The value of $1 invested at the start of the sample, with each day's return compounded.</p>
+        <div class="chart-panel"><div id="wealth-chart" class="chart"></div></div>
+      </section>
+
+      <section id="risk" class="section" aria-labelledby="risk-heading">
+        <h2 id="risk-heading">Risk over time</h2>
+        <div class="two-col">
+          <div class="chart-panel">
+            <h3>Drawdown</h3>
+            <p class="chart-explanation">How far the portfolio and benchmark are below their previous high. Zero means a new high.</p>
+            <div id="drawdown-chart" class="chart"></div>
+          </div>
+          <div class="chart-panel">
+            <h3>Rolling Sharpe ratio</h3>
+            <p class="chart-explanation">Risk-adjusted return calculated over each preceding <span id="sharpe-window">60-day window</span>. Higher values indicate more excess return per unit of volatility.</p>
+            <div id="sharpe-chart" class="chart"></div>
+          </div>
+        </div>
+        <div class="chart-panel histogram-panel">
+          <h3>Daily return distribution</h3>
+          <p class="chart-explanation">The number of days in each return range. This uses all daily observations, regardless of the line chart range above.</p>
+          <div id="histogram-chart" class="chart"></div>
+        </div>
+      </section>
+
+      <section id="factors" class="section" aria-labelledby="factors-heading">
+        <h2 id="factors-heading">Factor analysis</h2>
+        <p class="section-intro">These regressions estimate how portfolio returns move with the benchmark or selected factors. The coefficients describe associations in the data.</p>
+        <div class="factor-tabs" role="tablist" aria-label="Factor model">
+          <button data-model="capm" role="tab">Benchmark</button>
+          <button data-model="ff3" role="tab">Fama–French 3</button>
+          <button data-model="ff5" role="tab" class="selected">Fama–French 5</button>
+          <button data-model="momentum" role="tab">Momentum</button>
+          <button data-model="carhart" role="tab">Carhart 4</button>
+        </div>
+        <div class="two-col factor-results">
+          <div class="chart-panel">
+            <h3>Factor coefficients</h3>
+            <p class="chart-explanation">A positive coefficient moves with the factor; a negative coefficient moves against it.</p>
+            <div id="factor-bars" class="factor-bars"></div>
+          </div>
+          <div class="chart-panel">
+            <h3 id="model-title">—</h3>
+            <div class="model-highlights">
+              <div><span>Annualized alpha</span><strong id="model-alpha">—</strong></div>
+              <div><span>R²</span><strong id="model-r2">—</strong></div>
+              <div><span>Observations</span><strong id="model-nobs">—</strong></div>
+            </div>
+            <p class="chart-explanation">Alpha is the fitted daily intercept multiplied by 252. R² is the share of return variation explained by the model.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Factor</th><th>Coefficient</th><th>t-stat</th><th>p-value</th></tr></thead>
+                <tbody id="factor-table"></tbody>
+              </table>
+            </div>
+            <p class="table-note">A dot marks a p-value below 0.05.</p>
+          </div>
+        </div>
+        <div class="chart-panel rolling-panel">
+          <h3>Rolling factor betas</h3>
+          <p class="chart-explanation">Factor coefficients recalculated over each preceding <span id="beta-window">60-day window</span>. Available for Fama–French 3 and 5, Momentum, and Carhart 4.</p>
+          <div id="betas-chart" class="chart"></div>
+        </div>
+      </section>
+
+      <section id="observations" class="section" aria-labelledby="observations-heading">
+        <h2 id="observations-heading">Recent observations</h2>
+        <p class="section-intro">The eight most recent valid daily rows from the uploaded CSV. Factor data source: <span id="factor-source">—</span>.</p>
+        <div class="table-wrap observations-table">
+          <table>
+            <thead><tr><th>Date</th><th>Portfolio return</th><th>Benchmark return</th></tr></thead>
+            <tbody id="returns-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="sample-quiz" class="section quiz-section" aria-labelledby="quiz-heading" hidden>
+        <div class="quiz-card">
+          <div>
+            <p class="quiz-label">Sample data quiz</p>
+            <h2 id="quiz-heading">Which ETF is this?</h2>
+            <p>Look at the growth and factor results, then guess the ticker behind the sample portfolio.</p>
+          </div>
+          <form id="quiz-form">
+            <label for="quiz-answer">ETF ticker</label>
+            <div class="quiz-controls">
+              <input id="quiz-answer" type="text" maxlength="30" autocomplete="off" spellcheck="false" placeholder="Your guess" required>
+              <button class="primary-button" type="submit">Check guess</button>
+              <button id="quiz-reveal" class="text-button" type="button">Reveal answer</button>
+            </div>
+          </form>
+          <p id="quiz-feedback" class="quiz-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
