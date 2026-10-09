@@ -1,6 +1,6 @@
 # Portfolio Return Performance Analyzer
 
-This projects parses through a csv file containing dates, portfolio returns and benchmark returns, and provides information about the drivers of the returns in relation to the benchmark.
+This project parses through a csv file containing dates, portfolio returns and benchmark returns, and provides information about the drivers of the returns in relation to the benchmark.
 
 ## Requirements
 
