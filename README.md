@@ -41,10 +41,11 @@ The **Try sample data** button loads [returns.csv](returns.csv), which contains 
 ## Report
 
 The report shows the following metrics:
-- Portfolio and benchmark return, volatility, Sharpe ratio, Sortino ratio, and maximum drawdown
-- Growth of $1 invested in the portfolio at the beggining of the period, drawdown, rolling Sharpe ratio, and daily return distribution
-- Exposure of the portfolio to the Benchmark, Fama–French 3 and 5, momentum, and Carhart factors
-- Rolling factor betas and the latest valid input rows
+- **Performance:** total return, annualized return, annualized volatility, Sharpe ratio, Sortino Ratio and maximum drawdown for the portfolio and the benchmark.
+- **Charts:** growth of $1 invested in the portfolio at the beggining of the period, drawdown, rolling Sharpe ratio, and daily return distribution
+- **Regressions:** estimated benchmark sensitivity and factor loadings from Fama-French 3 and 5 factor models, momentum factor and Carhart 4 factor model.
+- **Rolling Estimates:** rolling factor coefficients calculated on a rolling basis
+- **Input Preview:** the eight most recent valid rows
 
 The dashboard runs on `127.0.0.1`. Uploaded CSV data is sent to that local Python server for analysis. Factor datasets are fetched separately from Kenneth French's Data Library usind pandas-datareader.
 
