@@ -1,7 +1,6 @@
 # Portfolio Return Performance Analyzer
 
-This project parses through a csv file containing dates, portfolio returns and benchmark returns, and provides information about the drivers of the returns in relation to the benchmark.
-
+This project reads daily portfolio and benchmark returns from a csv file and summarize key performance and risk metrics, as well as factor exposures.
 ## Requirements
 
 - Python 3.13 (the version used to verify this project)
